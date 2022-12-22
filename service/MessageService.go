@@ -101,3 +101,47 @@ func (s *MessageService) SendFilePdf(req *dto.ReqSendPdf) {
 		fmt.Println("Message sent (server timestamp: %s)", resp.Timestamp)
 	}
 }
+
+func (s *MessageService) SendButton(req *dto.ReqSend) {
+	//send
+	recipient, ok := config.ParseJID(req.No)
+	if !ok {
+		return
+	}
+
+	this_message := &waProto.Message{
+		TemplateMessage: &waProto.TemplateMessage{
+			HydratedTemplate: &waProto.TemplateMessage_HydratedFourRowTemplate{
+				TemplateId:          proto.String("id1"),
+				HydratedContentText: proto.String(req.Text),
+				HydratedButtons: []*waProto.HydratedTemplateButton{
+					{
+						Index: proto.Uint32(1),
+						HydratedButton: &waProto.HydratedTemplateButton_QuickReplyButton{
+							QuickReplyButton: &waProto.HydratedTemplateButton_HydratedQuickReplyButton{
+								DisplayText: proto.String("Reply"),
+								Id:          proto.String("id"),
+							},
+						},
+					},
+					{
+						Index: proto.Uint32(2),
+						HydratedButton: &waProto.HydratedTemplateButton_QuickReplyButton{
+							QuickReplyButton: &waProto.HydratedTemplateButton_HydratedQuickReplyButton{
+								DisplayText: proto.String("Menu"),
+								Id:          proto.String("menu"),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	resp, err := config.GetClient().SendMessage(context.Background(), recipient, "", this_message)
+	if err != nil {
+		fmt.Println("Error sending message: %v", err)
+	} else {
+		fmt.Println("Message sent (server timestamp: %s)", resp.Timestamp)
+	}
+}

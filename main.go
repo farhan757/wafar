@@ -40,6 +40,7 @@ func main() {
 		v1.POST("/wa/send", BasicAuthMiddleware(), wa.Send)
 		v1.POST("/wa/sendimg", BasicAuthMiddleware(), wa.SendImage)
 		v1.POST("/wa/sendpdf", BasicAuthMiddleware(), wa.SendFile)
+		v1.POST("/wa/sendbtn", BasicAuthMiddleware(), wa.SendButton)
 	}
 
 	port := os.Getenv("PORT")

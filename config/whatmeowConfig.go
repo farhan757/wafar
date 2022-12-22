@@ -8,21 +8,23 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"waapifar/dto"
 
 	_ "github.com/lib/pq"
-	waProto "go.mau.fi/whatsmeow/binary/proto"
-	"google.golang.org/protobuf/proto"
 
 	//_ "github.com/mattn/go-sqlite3"
 	"github.com/mdp/qrterminal/v3"
 	"go.mau.fi/whatsmeow"
+	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/store/sqlstore"
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
 	waLog "go.mau.fi/whatsmeow/util/log"
+	"google.golang.org/protobuf/proto"
 )
 
 var client *whatsmeow.Client
+var req dto.ReqSend
 
 type KeyBot struct {
 	key_string  string
@@ -99,6 +101,7 @@ func GetClient() *whatsmeow.Client {
 }
 
 func eventHandler(evt interface{}) {
+
 	switch v := evt.(type) {
 	case *events.Message:
 		//fmt.Println("Received a message!", v.Message.GetConversation())
@@ -138,22 +141,30 @@ func eventHandler(evt interface{}) {
 			if err != nil {
 				fmt.Println(err)
 			} else {
-				recipient, ok := ParseJID(v.Info.Sender.User)
-				if !ok {
-					fmt.Println(ok)
-				}
-
-				msg := &waProto.Message{Conversation: proto.String(keybot.desc_string)}
-
-				resp, err := GetClient().SendMessage(context.Background(), recipient, "", msg)
-				if err != nil {
-					fmt.Println("Error sending message: %v", err)
-				} else {
-					fmt.Println("Message sent (server timestamp: %s)", resp.Timestamp)
-				}
+				req.No = v.Info.Sender.User
+				req.Text = keybot.desc_string
+				SendRepBot(&req)
 			}
 			//db.Close()
 		}
+	}
+}
+
+func SendRepBot(req *dto.ReqSend) {
+
+	//send
+	recipient, ok := ParseJID(req.No)
+	if !ok {
+		return
+	}
+
+	msg := &waProto.Message{Conversation: proto.String(req.Text)}
+
+	resp, err := GetClient().SendMessage(context.Background(), recipient, "", msg)
+	if err != nil {
+		fmt.Println("Error sending message: %v", err)
+	} else {
+		fmt.Println("Message sent (server timestamp: %s)", resp.Timestamp)
 	}
 }
 

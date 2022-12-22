@@ -29,6 +29,20 @@ func (ctrl MessageController) Send(c *gin.Context) {
 
 }
 
+func (ctrl MessageController) Sends(c *gin.Context, req dto.ReqSend) {
+	fmt.Printf("ClientIP: %s\n", c.ClientIP())
+
+	// Call BindJSON to bind the received JSON to
+	// newAlbum.
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "Invalid Request", "data": err})
+	} else {
+		messageService.SendMessage(&req)
+		c.JSON(http.StatusOK, gin.H{"message": "Successfully"})
+	}
+
+}
+
 func (ctrl MessageController) SendImage(c *gin.Context) {
 	fmt.Printf("ClientIP: %s\n", c.ClientIP())
 
@@ -99,4 +113,18 @@ func (ctrl MessageController) SendFile(c *gin.Context) {
 
 	messageService.SendFilePdf(&reqSendPdf)
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully"})
+}
+
+func (ctrl MessageController) SendButton(c *gin.Context) {
+	fmt.Printf("ClientIP: %s\n", c.ClientIP())
+
+	// Call BindJSON to bind the received JSON to
+	// newAlbum.
+	if err := c.BindJSON(&reqSend); err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "Invalid Request", "data": err})
+	} else {
+		messageService.SendButton(reqSend)
+		c.JSON(http.StatusOK, gin.H{"message": "Successfully"})
+	}
+
 }
